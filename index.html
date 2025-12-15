@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Christmas Card Label Printer</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Georgia", serif;
+        background: url("https://images.unsplash.com/photo-1708961462805-9949475ea462?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D")
+          center/cover no-repeat;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: linear-gradient(
+          135deg,
+          rgba(228, 189, 189, 0.95) 0%,
+          rgba(244, 190, 239, 0.9) 50%,
+          rgba(157, 234, 237, 0.95) 100%
+        );
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 2.5em;
+      }
+
+      .subtitle {
+        text-align: center;
+        color: #666;
+        margin-bottom: 30px;
+        font-style: italic;
+      }
+
+      .controls {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      button {
+        background: #667eea;
+        color: white;
+        border: none;
+        padding: 15px 40px;
+        font-size: 1.1em;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: bold;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      }
+
+      .holiday-buttons {
+        text-align: center;
+        margin-bottom: 30px;
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .holiday-buttons button {
+        padding: 15px 25px;
+        font-size: 1.1em;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: bold;
+      }
+
+      /* Theme styles */
+      .christmas {
+        background: linear-gradient(135deg, #c41e3a 0%, #2e8b57 100%);
+      }
+      .christmas button {
+        background: #c41e3a;
+        color: white;
+      }
+      .christmas .holiday-buttons button {
+        background: #2e8b57;
+      }
+
+      .easter {
+        background: linear-gradient(135deg, #ffb6c1 0%, #98fb98 100%);
+      }
+      .easter button {
+        background: #ff69b4;
+        color: white;
+      }
+      .easter .holiday-buttons button {
+        background: #32cd32;
+      }
+
+      .july4 {
+        background: linear-gradient(135deg, #ff0000 0%, #0000ff 100%);
+      }
+      .july4 button {
+        background: #dc143c;
+        color: white;
+      }
+      .july4 .holiday-buttons button {
+        background: #4169e1;
+      }
+
+      .veterans {
+        background: linear-gradient(135deg, #8b4513 0%, #2f4f4f 100%);
+      }
+      .veterans button {
+        background: #8b4513;
+        color: white;
+      }
+      .veterans .holiday-buttons button {
+        background: #2f4f4f;
+      }
+
+      .back-btn {
+        background: #6c757d !important;
+        margin-bottom: 15px;
+        padding: 10px 20px !important;
+        font-size: 0.9em !important;
+      }
+
+      .screen-only {
+        display: block;
+      }
+
+      .preview {
+        border: 2px dashed #ccc;
+        padding: 20px;
+        background: #f9f9f9;
+        border-radius: 8px;
+      }
+
+      .preview h2 {
+        color: #667eea;
+        margin-bottom: 20px;
+      }
+
+      /* Print styles */
+      @media print {
+        body {
+          background: white;
+          padding: 0;
+          margin: 0;
+        }
+
+        .screen-only {
+          display: none !important;
+        }
+
+        .container {
+          max-width: none;
+          padding: 0;
+          box-shadow: none;
+          border-radius: 0;
+        }
+
+        .print-area {
+          display: block !important;
+        }
+      }
+
+      /* A4 Print Layout */
+      @page {
+        size: A4 portrait;
+        margin: 15mm;
+      }
+
+      .print-area {
+        display: none;
+      }
+
+      @media print {
+        .print-area {
+          width: 210mm;
+          display: flex;
+          flex-direction: column;
+          gap: 8mm;
+          padding: 0;
+        }
+
+        .label-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8mm;
+        }
+      }
+
+      .label {
+        border: 1px solid #ddd;
+        padding: 12px;
+        background: white;
+        page-break-inside: avoid;
+        min-height: 35mm;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      @media print {
+        .label {
+          border: 1px dashed #999;
+          font-size: 11pt;
+          line-height: 1.4;
+        }
+      }
+
+      .label-name {
+        font-weight: bold;
+        margin-bottom: 4px;
+        font-size: 1.1em;
+      }
+
+      .label-address {
+        color: #333;
+      }
+
+      /* Preview grid on screen */
+      .preview .print-area {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .preview .label-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="screen-only">
+        <h1 id="main-title">Card Labels</h1>
+
+        <div id="holiday-selection" class="holiday-buttons">
+          <button onclick="selectHoliday('christmas')">🎄 Christmas</button>
+          <button onclick="selectHoliday('easter')">🐰 Easter</button>
+          <button onclick="selectHoliday('july4')">🇺🇸 4th July</button>
+          <button onclick="selectHoliday('veterans')">🎖️ Veteran's Day</button>
+        </div>
+
+        <div id="label-controls" class="controls" style="display: none">
+          <button onclick="goBack()" class="back-btn">← Back</button>
+          <p class="subtitle" id="subtitle"></p>
+          <button onclick="printRecipientLabels()">
+            🖨️ Print Recipient Labels
+          </button>
+          <button onclick="printSenderLabels()">📮 Print Sender Labels</button>
+        </div>
+
+        <div class="preview" id="preview-section" style="display: none">
+          <h2>Preview (Total: <span id="count">0</span> addresses)</h2>
+          <div id="preview-area"></div>
+        </div>
+      </div>
+
+      <div class="print-area" id="print-area"></div>
+    </div>
+
+    <script>
+      let addresses = [];
+      const senderAddress = {
+        name: "Your Name",
+        address: "Your Address",
+        city: "Your City",
+        state: "ST",
+        zip: "12345",
+      };
+
+      async function loadAddresses() {
+        try {
+          const response = await fetch("addresses.json");
+          addresses = await response.json();
+          renderLabels();
+        } catch (error) {
+          console.error("Error loading addresses:", error);
+          document.getElementById("count").textContent =
+            "Error loading addresses";
+        }
+      }
+
+      function createLabel(addr) {
+        const label = document.createElement("div");
+        label.className = "label";
+        label.innerHTML = `
+          <div class="label-name">${addr.name}</div>
+          <div class="label-address">
+            ${addr.address}<br>
+            ${addr.city}, ${addr.state} ${addr.zip}
+          </div>
+        `;
+        return label;
+      }
+
+      function goBack() {
+        const holidaySelection = document.getElementById("holiday-selection");
+        const labelControls = document.getElementById("label-controls");
+        const previewSection = document.getElementById("preview-section");
+
+        document.body.className = "";
+        holidaySelection.style.display = "flex";
+        labelControls.style.display = "none";
+        previewSection.style.display = "none";
+      }
+
+      function selectHoliday(holiday) {
+        const body = document.body;
+        const subtitle = document.getElementById("subtitle");
+        const holidaySelection = document.getElementById("holiday-selection");
+        const labelControls = document.getElementById("label-controls");
+        const previewSection = document.getElementById("preview-section");
+
+        body.className = holiday;
+
+        const themes = {
+          christmas: "Print beautiful address labels for your Christmas cards",
+          easter: "Print beautiful address labels for your Easter cards",
+          july4: "Print beautiful address labels for your 4th of July cards",
+          veterans:
+            "Print beautiful address labels for your Veteran's Day cards",
+        };
+
+        subtitle.textContent = themes[holiday];
+        holidaySelection.style.display = "none";
+        labelControls.style.display = "block";
+        previewSection.style.display = "block";
+      }
+
+      function printRecipientLabels() {
+        renderLabels(addresses);
+        window.print();
+      }
+
+      function printSenderLabels() {
+        const senderLabels = Array(addresses.length).fill(senderAddress);
+        renderLabels(senderLabels);
+        window.print();
+      }
+
+      function renderLabels(addressList = addresses) {
+        const printArea = document.getElementById("print-area");
+        const previewArea = document.getElementById("preview-area");
+        const countSpan = document.getElementById("count");
+
+        printArea.innerHTML = "";
+        previewArea.innerHTML = "";
+
+        for (let i = 0; i < addressList.length; i += 2) {
+          const row = document.createElement("div");
+          row.className = "label-row";
+
+          row.appendChild(createLabel(addressList[i]));
+
+          if (i + 1 < addressList.length) {
+            row.appendChild(createLabel(addressList[i + 1]));
+          }
+
+          printArea.appendChild(row.cloneNode(true));
+          previewArea.appendChild(row);
+        }
+
+        countSpan.textContent = addressList.length;
+      }
+
+      loadAddresses();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,58 @@
+[
+  {
+    "name": "John & Jane Smith",
+    "address": "123 Maple Street",
+    "city": "Springfield",
+    "state": "IL",
+    "zip": "62701"
+  },
+  {
+    "name": "The Anderson Family",
+    "address": "456 Oak Avenue",
+    "city": "Portland",
+    "state": "OR",
+    "zip": "97201"
+  },
+  {
+    "name": "Robert & Mary Johnson",
+    "address": "789 Pine Road",
+    "city": "Austin",
+    "state": "TX",
+    "zip": "78701"
+  },
+  {
+    "name": "The Williams Household",
+    "address": "321 Elm Boulevard",
+    "city": "Seattle",
+    "state": "WA",
+    "zip": "98101"
+  },
+  {
+    "name": "David & Sarah Brown",
+    "address": "654 Cedar Lane",
+    "city": "Denver",
+    "state": "CO",
+    "zip": "80201"
+  },
+  {
+    "name": "Michael & Lisa Davis",
+    "address": "987 Birch Court",
+    "city": "Boston",
+    "state": "MA",
+    "zip": "02101"
+  },
+  {
+    "name": "The Miller Family",
+    "address": "147 Spruce Drive",
+    "city": "Phoenix",
+    "state": "AZ",
+    "zip": "85001"
+  },
+  {
+    "name": "Christopher & Jennifer Wilson",
+    "address": "258 Willow Way",
+    "city": "Nashville",
+    "state": "TN",
+    "zip": "37201"
+  }
+]
