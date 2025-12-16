@@ -224,6 +224,10 @@
           font-size: 11pt;
           line-height: 1.4;
         }
+
+        .label-actions {
+          display: none !important;
+        }
       }
 
       .label-name {
@@ -269,11 +273,25 @@
             🖨️ Print Recipient Labels
           </button>
           <button onclick="printSenderLabels()">📮 Print Sender Labels</button>
+          <button onclick="toggleAddForm()" style="background: #28a745;">➕ Add Recipient</button>
         </div>
 
         <div class="preview" id="preview-section" style="display: none">
           <h2>Preview (Total: <span id="count">0</span> addresses)</h2>
           <div id="preview-area"></div>
+        </div>
+
+        <div id="add-recipient-form" style="display: none; margin-top: 20px; padding: 20px; background: rgba(255,255,255,0.9); border-radius: 8px;">
+          <h3>Add New Recipient</h3>
+          <form id="recipient-form">
+            <input type="text" id="name" placeholder="Name" required style="width: 100%; margin: 5px 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <input type="text" id="address" placeholder="Address" required style="width: 100%; margin: 5px 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <input type="text" id="city" placeholder="City" required style="width: 100%; margin: 5px 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <input type="text" id="state" placeholder="State" required style="width: 100%; margin: 5px 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <input type="text" id="zip" placeholder="ZIP Code" required style="width: 100%; margin: 5px 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <button type="submit" style="margin: 10px 5px 0 0;">Add Recipient</button>
+            <button type="button" onclick="toggleAddForm()" style="background: #6c757d;">Cancel</button>
+          </form>
         </div>
       </div>
 
@@ -292,15 +310,101 @@
 
       async function loadAddresses() {
         try {
-          const response = await fetch("addresses.json");
+          const response = await fetch('/api/recipients');
           addresses = await response.json();
           renderLabels();
         } catch (error) {
           console.error("Error loading addresses:", error);
-          document.getElementById("count").textContent =
-            "Error loading addresses";
+          document.getElementById("count").textContent = "Error loading addresses";
         }
       }
+
+      async function addRecipient(recipientData) {
+        try {
+          const response = await fetch('/api/recipients', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(recipientData)
+          });
+          const newRecipient = await response.json();
+          addresses.push(newRecipient);
+          renderLabels();
+          return newRecipient;
+        } catch (error) {
+          console.error("Error adding recipient:", error);
+        }
+      }
+
+      async function deleteRecipient(id) {
+        if (!confirm('Are you sure you want to delete this recipient?')) return;
+        try {
+          await fetch(`/api/recipients/${id}`, { method: 'DELETE' });
+          addresses = addresses.filter(addr => addr.id !== id);
+          renderLabels();
+        } catch (error) {
+          console.error("Error deleting recipient:", error);
+        }
+      }
+
+      async function editRecipient(id) {
+        const recipient = addresses.find(addr => addr.id === id);
+        if (!recipient) return;
+        
+        document.getElementById('name').value = recipient.name;
+        document.getElementById('address').value = recipient.address;
+        document.getElementById('city').value = recipient.city;
+        document.getElementById('state').value = recipient.state;
+        document.getElementById('zip').value = recipient.zip;
+        
+        const form = document.getElementById('recipient-form');
+        form.dataset.editId = id;
+        toggleAddForm();
+      }
+
+      function toggleAddForm() {
+        const form = document.getElementById('add-recipient-form');
+        const isVisible = form.style.display !== 'none';
+        form.style.display = isVisible ? 'none' : 'block';
+        
+        if (!isVisible) {
+          document.getElementById('recipient-form').reset();
+          delete document.getElementById('recipient-form').dataset.editId;
+        }
+      }
+
+      document.getElementById('recipient-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = {
+          name: document.getElementById('name').value,
+          address: document.getElementById('address').value,
+          city: document.getElementById('city').value,
+          state: document.getElementById('state').value,
+          zip: document.getElementById('zip').value
+        };
+
+        const editId = e.target.dataset.editId;
+        
+        if (editId) {
+          try {
+            const response = await fetch(`/api/recipients/${editId}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(formData)
+            });
+            const updatedRecipient = await response.json();
+            const index = addresses.findIndex(addr => addr.id == editId);
+            addresses[index] = updatedRecipient;
+            renderLabels();
+          } catch (error) {
+            console.error("Error updating recipient:", error);
+          }
+        } else {
+          await addRecipient(formData);
+        }
+        
+        toggleAddForm();
+      });
 
       function createLabel(addr) {
         const label = document.createElement("div");
@@ -310,6 +414,10 @@
           <div class="label-address">
             ${addr.address}<br>
             ${addr.city}, ${addr.state} ${addr.zip}
+          </div>
+          <div class="label-actions" style="margin-top: 8px; display: flex; gap: 5px;">
+            <button onclick="editRecipient(${addr.id})" style="padding: 4px 8px; font-size: 0.8em; background: #ffc107; color: #000;">Edit</button>
+            <button onclick="deleteRecipient(${addr.id})" style="padding: 4px 8px; font-size: 0.8em; background: #dc3545;">Delete</button>
           </div>
         `;
         return label;
