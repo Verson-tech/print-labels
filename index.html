@@ -176,6 +176,27 @@
         grid-template-columns: 1fr 1fr;
         gap: 15px;
       }
+
+      /* Modal overlay styles for centered forms */
+      .modal-overlay {
+        display: none; /* shown by JS */
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .modal-content {
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 8px;
+        padding: 20px;
+        width: 100%;
+        max-width: 560px;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+      }
     </style>
   </head>
   <body>
@@ -219,17 +240,9 @@
           <div id="preview-area"></div>
         </div>
 
-        <div
-          id="add-recipient-form"
-          style="
-            display: none;
-            margin-top: 20px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 8px;
-          "
-        >
-          <h3>Add New Recipient</h3>
+        <div id="add-recipient-form" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="recipient-form-title" style="display: none;">
+          <div class="modal-content">
+          <h3 id="recipient-form-title">Add New Recipient</h3>
           <form id="recipient-form">
             <input
               type="text"
@@ -296,7 +309,7 @@
                 border-radius: 4px;
               "
             />
-            <button type="submit" style="margin: 10px 5px 0 0">
+            <button type="submit" id="recipient-submit-btn" style="margin: 10px 5px 0 0">
               Add Recipient
             </button>
             <button
@@ -307,19 +320,58 @@
               Cancel
             </button>
           </form>
+          </div>
         </div>
 
-        <div
-          id="add-sender-form"
-          style="
-            display: none;
-            margin-top: 20px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 8px;
-          "
-        >
-          <h3>Set Sender Information</h3>
+        <!-- Update Recipient Form (separate from Add) -->
+        <div id="update-recipient-form" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="update-recipient-title" style="display: none;">
+          <div class="modal-content">
+          <h3 id="update-recipient-title">Update Recipient</h3>
+          <form id="recipient-update-form">
+            <input
+              type="text"
+              id="update-name"
+              placeholder="Name"
+              required
+              style="width: 100%; margin: 5px 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"
+            />
+            <input
+              type="text"
+              id="update-address"
+              placeholder="Address"
+              required
+              style="width: 100%; margin: 5px 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"
+            />
+            <input
+              type="text"
+              id="update-city"
+              placeholder="City"
+              required
+              style="width: 100%; margin: 5px 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"
+            />
+            <input
+              type="text"
+              id="update-state"
+              placeholder="State"
+              required
+              style="width: 100%; margin: 5px 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"
+            />
+            <input
+              type="text"
+              id="update-zip"
+              placeholder="ZIP Code"
+              required
+              style="width: 100%; margin: 5px 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"
+            />
+            <button type="submit" id="recipient-update-btn" style="margin: 10px 5px 0 0; background: #007bff;">Update</button>
+            <button type="button" id="cancel-update-btn" style="background: #6c757d">Cancel changes</button>
+          </form>
+          </div>
+        </div>
+
+        <div id="add-sender-form" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="sender-form-title" style="display: none;">
+          <div class="modal-content">
+          <h3 id="sender-form-title">Set Sender Information</h3>
           <form id="sender-form">
             <input
               type="text"
@@ -411,6 +463,7 @@
               Cancel
             </button>
           </form>
+          </div>
         </div>
 
         <div class="preview" id="sender-preview-section" style="display: none">
@@ -427,6 +480,64 @@
     <script>
       let addresses = [];
       let senders = [];
+      // Track last focused element for accessibility when opening modals
+      let _lastFocusedElement = null;
+
+      // Open modal overlay by id and focus a selector inside it
+      function openModal(modalId, focusSelector) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+        _lastFocusedElement = document.activeElement;
+        modal.style.display = "flex";
+
+        // Key handler to close on Escape
+        function onKey(e) {
+          if (e.key === "Escape") closeModal(modalId);
+        }
+        modal.__onKey = onKey;
+        document.addEventListener("keydown", onKey);
+
+        // Click on backdrop to close
+        function onOverlayClick(e) {
+          if (e.target === modal) closeModal(modalId);
+        }
+        modal.__onOverlayClick = onOverlayClick;
+        modal.addEventListener("click", onOverlayClick);
+
+        // Focus first element or specified selector
+        setTimeout(() => {
+          const focusEl = focusSelector
+            ? modal.querySelector(focusSelector)
+            : modal.querySelector("input, button, [tabindex]");
+          if (focusEl && typeof focusEl.focus === "function") focusEl.focus();
+        }, 0);
+      }
+
+      function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+        modal.style.display = "none";
+        if (modal.__onKey) {
+          document.removeEventListener("keydown", modal.__onKey);
+          delete modal.__onKey;
+        }
+        if (modal.__onOverlayClick) {
+          modal.removeEventListener("click", modal.__onOverlayClick);
+          delete modal.__onOverlayClick;
+        }
+
+        // Reset form inside modal and clear edit state if any
+        const innerForm = modal.querySelector("form");
+        if (innerForm) {
+          innerForm.reset();
+          if (innerForm.dataset.editId) delete innerForm.dataset.editId;
+        }
+
+        if (_lastFocusedElement && typeof _lastFocusedElement.focus === "function") {
+          _lastFocusedElement.focus();
+          _lastFocusedElement = null;
+        }
+      }
 
       async function loadAddresses() {
         try {
@@ -477,31 +588,87 @@
         }
       }
 
-      async function editRecipient(id) {
+      // Open the separate Update form and populate fields
+      function editRecipient(id) {
         const recipient = addresses.find((addr) => addr.id === id);
         if (!recipient) return;
 
-        document.getElementById("name").value = recipient.name;
-        document.getElementById("address").value = recipient.address;
-        document.getElementById("city").value = recipient.city;
-        document.getElementById("state").value = recipient.state;
-        document.getElementById("zip").value = recipient.zip;
+        document.getElementById("update-name").value = recipient.name;
+        document.getElementById("update-address").value = recipient.address;
+        document.getElementById("update-city").value = recipient.city;
+        document.getElementById("update-state").value = recipient.state;
+        document.getElementById("update-zip").value = recipient.zip;
+        const updateForm = document.getElementById("recipient-update-form");
+        updateForm.dataset.editId = id;
 
-        const form = document.getElementById("recipient-form");
-        form.dataset.editId = id;
-        toggleAddForm();
+        // Ensure add form is hidden so the Update form is distinct
+        closeModal("add-recipient-form");
+
+        // Show update form as modal and focus first input
+        openModal("update-recipient-form", "#update-name");
+      }
+
+      function cancelRecipientUpdate() {
+        // Use closeModal to hide, reset and restore focus
+        closeModal("update-recipient-form");
       }
 
       function toggleAddForm() {
         const form = document.getElementById("add-recipient-form");
         const isVisible = form.style.display !== "none";
-        form.style.display = isVisible ? "none" : "block";
-
-        if (!isVisible) {
+        if (isVisible) {
+          closeModal("add-recipient-form");
+        } else {
+          // prepare for add
           document.getElementById("recipient-form").reset();
           delete document.getElementById("recipient-form").dataset.editId;
+          document.getElementById("recipient-form-title").textContent = "Add New Recipient";
+          document.getElementById("recipient-submit-btn").textContent = "Add Recipient";
+          openModal("add-recipient-form", "#name");
         }
       }
+
+      // Handle Update form submission
+      document
+        .getElementById("recipient-update-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const editId = document.getElementById("recipient-update-form").dataset.editId;
+          if (!editId) return;
+
+          const formData = {
+            name: document.getElementById("update-name").value,
+            address: document.getElementById("update-address").value,
+            city: document.getElementById("update-city").value,
+            state: document.getElementById("update-state").value,
+            zip: document.getElementById("update-zip").value,
+          };
+
+          try {
+            const response = await fetch(`/api/recipients/${editId}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(formData),
+            });
+            const updatedRecipient = await response.json();
+            const index = addresses.findIndex((addr) => addr.id == editId);
+            if (index !== -1) {
+              addresses[index] = updatedRecipient;
+            }
+            renderLabels();
+            // Hide and reset update form
+            cancelRecipientUpdate();
+          } catch (error) {
+            console.error("Error updating recipient:", error);
+          }
+        });
+
+      // Cancel changes button handler
+      document.getElementById("cancel-update-btn").addEventListener("click", (e) => {
+        e.preventDefault();
+        cancelRecipientUpdate();
+      });
 
       document
         .getElementById("recipient-form")
@@ -516,7 +683,7 @@
             zip: document.getElementById("zip").value,
           };
 
-          const editId = e.target.dataset.editId;
+          const editId = document.getElementById("recipient-form").dataset.editId;
 
           if (editId) {
             try {
@@ -529,6 +696,9 @@
               const index = addresses.findIndex((addr) => addr.id == editId);
               addresses[index] = updatedRecipient;
               renderLabels();
+              delete document.getElementById("recipient-form").dataset.editId;
+              document.getElementById("recipient-form-title").textContent = "Add New Recipient";
+              document.getElementById("recipient-submit-btn").textContent = "Add Recipient";
             } catch (error) {
               console.error("Error updating recipient:", error);
             }
@@ -566,6 +736,7 @@
         );
         const addForm = document.getElementById("add-recipient-form");
         const senderForm = document.getElementById("add-sender-form");
+        const updateForm = document.getElementById("update-recipient-form");
 
         initialSelection.style.display = "block";
         labelControls.style.display = "none";
@@ -574,6 +745,9 @@
         senderPreviewSection.style.display = "none";
         addForm.style.display = "none";
         senderForm.style.display = "none";
+        if (updateForm) {
+          closeModal("update-recipient-form");
+        }
       }
 
       function showRecipientLabels() {
@@ -605,11 +779,12 @@
       function toggleSenderForm() {
         const form = document.getElementById("add-sender-form");
         const isVisible = form.style.display !== "none";
-        form.style.display = isVisible ? "none" : "block";
-
-        if (!isVisible) {
+        if (isVisible) {
+          closeModal("add-sender-form");
+        } else {
           document.getElementById("sender-form").reset();
           delete document.getElementById("sender-form").dataset.editId;
+          openModal("add-sender-form", "#sender-name");
         }
       }
 
@@ -667,7 +842,7 @@
               parseInt(document.getElementById("label-count").value) || 20,
           };
 
-          const editId = e.target.dataset.editId;
+          const editId = document.getElementById("sender-form").dataset.editId;
 
           if (editId) {
             try {
