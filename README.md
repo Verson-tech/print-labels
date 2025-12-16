@@ -57,8 +57,9 @@ http://localhost:3000
 
 ## Database Structure
 
-The app uses a MySQL database named `christmas_cards` with a `recipients` table:
+The app uses a MySQL database named `christmas_cards` with two main tables:
 
+### Recipients Table
 ```sql
 CREATE TABLE recipients (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -68,6 +69,20 @@ CREATE TABLE recipients (
   state VARCHAR(10) NOT NULL,
   zip VARCHAR(20) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### Sender Table
+```sql
+CREATE TABLE sender (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  address VARCHAR(255) NOT NULL,
+  city VARCHAR(100) NOT NULL,
+  state VARCHAR(10) NOT NULL,
+  zip VARCHAR(20) NOT NULL,
+  label_count INT DEFAULT 20,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 ```
 
@@ -81,10 +96,17 @@ CREATE TABLE recipients (
 
 ## API Endpoints
 
+### Recipients
 - `GET /api/recipients` - Get all recipients
 - `POST /api/recipients` - Add new recipient
 - `PUT /api/recipients/:id` - Update recipient
 - `DELETE /api/recipients/:id` - Delete recipient
+
+### Senders
+- `GET /api/senders` - Get all senders
+- `POST /api/senders` - Add new sender
+- `PUT /api/senders/:id` - Update sender
+- `DELETE /api/senders/:id` - Delete sender
 
 ## License
 
