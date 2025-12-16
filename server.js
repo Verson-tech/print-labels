@@ -77,6 +77,64 @@ app.delete("/api/recipients/:id", async (req, res) => {
   }
 });
 
+// Get all senders
+app.get('/api/senders', async (req, res) => {
+  try {
+    const connection = await mysql.createConnection(dbConfig);
+    const [rows] = await connection.execute('SELECT * FROM sender ORDER BY updated_at DESC');
+    await connection.end();
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Add new sender
+app.post('/api/senders', async (req, res) => {
+  try {
+    const { name, address, city, state, zip, label_count } = req.body;
+    const connection = await mysql.createConnection(dbConfig);
+    const [result] = await connection.execute(
+      'INSERT INTO sender (name, address, city, state, zip, label_count) VALUES (?, ?, ?, ?, ?, ?)',
+      [name, address, city, state, zip, label_count || 20]
+    );
+    await connection.end();
+    res.json({ id: result.insertId, name, address, city, state, zip, label_count: label_count || 20 });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update sender
+app.put('/api/senders/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, address, city, state, zip, label_count } = req.body;
+    const connection = await mysql.createConnection(dbConfig);
+    await connection.execute(
+      'UPDATE sender SET name = ?, address = ?, city = ?, state = ?, zip = ?, label_count = ? WHERE id = ?',
+      [name, address, city, state, zip, label_count, id]
+    );
+    await connection.end();
+    res.json({ id, name, address, city, state, zip, label_count });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete sender
+app.delete('/api/senders/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const connection = await mysql.createConnection(dbConfig);
+    await connection.execute('DELETE FROM sender WHERE id = ?', [id]);
+    await connection.end();
+    res.json({ message: 'Sender deleted' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
