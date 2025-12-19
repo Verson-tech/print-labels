@@ -487,8 +487,21 @@
       function openModal(modalId, focusSelector) {
         const modal = document.getElementById(modalId);
         if (!modal) return;
+        console.debug("openModal called:", modalId);
         _lastFocusedElement = document.activeElement;
+
+        // ensure any previous handlers are cleaned up (idempotent attach)
+        if (modal.__onKey) {
+          document.removeEventListener("keydown", modal.__onKey);
+          delete modal.__onKey;
+        }
+        if (modal.__onOverlayClick) {
+          modal.removeEventListener("click", modal.__onOverlayClick);
+          delete modal.__onOverlayClick;
+        }
+
         modal.style.display = "flex";
+        modal.setAttribute('data-open', 'true');
 
         // Key handler to close on Escape
         function onKey(e) {
@@ -506,17 +519,23 @@
 
         // Focus first element or specified selector
         setTimeout(() => {
-          const focusEl = focusSelector
-            ? modal.querySelector(focusSelector)
-            : modal.querySelector("input, button, [tabindex]");
-          if (focusEl && typeof focusEl.focus === "function") focusEl.focus();
+          try {
+            const focusEl = focusSelector
+              ? modal.querySelector(focusSelector)
+              : modal.querySelector("input, button, [tabindex]");
+            if (focusEl && typeof focusEl.focus === "function") focusEl.focus();
+          } catch (err) {
+            console.debug("openModal focus error:", err);
+          }
         }, 0);
       }
 
       function closeModal(modalId) {
         const modal = document.getElementById(modalId);
         if (!modal) return;
+        console.debug("closeModal called:", modalId);
         modal.style.display = "none";
+        modal.removeAttribute('data-open');
         if (modal.__onKey) {
           document.removeEventListener("keydown", modal.__onKey);
           delete modal.__onKey;
@@ -529,14 +548,23 @@
         // Reset form inside modal and clear edit state if any
         const innerForm = modal.querySelector("form");
         if (innerForm) {
-          innerForm.reset();
-          if (innerForm.dataset.editId) delete innerForm.dataset.editId;
+          try {
+            innerForm.reset();
+            if (innerForm.dataset.editId) delete innerForm.dataset.editId;
+          } catch (err) {
+            console.debug("error resetting inner form:", err);
+          }
         }
 
-        if (_lastFocusedElement && typeof _lastFocusedElement.focus === "function") {
-          _lastFocusedElement.focus();
-          _lastFocusedElement = null;
+        // restore focus if possible, but do not throw if the element is gone
+        try {
+          if (_lastFocusedElement && typeof _lastFocusedElement.focus === "function") {
+            _lastFocusedElement.focus();
+          }
+        } catch (err) {
+          console.debug("focus restore failed:", err);
         }
+        _lastFocusedElement = null;
       }
 
       async function loadAddresses() {
@@ -546,8 +574,8 @@
           renderLabels();
         } catch (error) {
           console.error("Error loading addresses:", error);
-          document.getElementById("count").textContent =
-            "Error loading addresses";
+          document.getElementById("count").innerHTML =
+            '<a href="https://github.com/Verson-tech/print-labels?tab=readme-ov-file" target="_blank" style="color: #007bff; text-decoration: underline;">To connect the database with your addresses follow instruction in this repository</a>';
         }
       }
 
@@ -590,6 +618,7 @@
 
       // Open the separate Update form and populate fields
       function editRecipient(id) {
+        console.debug("editRecipient called for id:", id);
         const recipient = addresses.find((addr) => addr.id === id);
         if (!recipient) return;
 
