@@ -48,6 +48,11 @@
         margin-bottom: 30px;
       }
 
+      #initial-selection button {
+        margin: 10px;
+        min-width: 250px;
+      }
+
       button {
         background: #c41e3a;
         color: white;
@@ -195,7 +200,23 @@
         padding: 20px;
         width: 100%;
         max-width: 560px;
-        box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+      }
+
+      @media (max-width: 768px) {
+        .controls button {
+          width: 100%;
+          margin: 5px 0;
+          padding: 12px 20px;
+          font-size: 1em;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .controls button {
+          padding: 10px 15px;
+          font-size: 0.9em;
+        }
       }
     </style>
   </head>
@@ -240,229 +261,296 @@
           <div id="preview-area"></div>
         </div>
 
-        <div id="add-recipient-form" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="recipient-form-title" style="display: none;">
+        <div
+          id="add-recipient-form"
+          class="modal-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="recipient-form-title"
+          style="display: none"
+        >
           <div class="modal-content">
-          <h3 id="recipient-form-title">Add New Recipient</h3>
-          <form id="recipient-form">
-            <input
-              type="text"
-              id="name"
-              placeholder="Name"
-              required
-              style="
-                width: 100%;
-                margin: 5px 0;
-                padding: 8px;
-                border: 1px solid #ccc;
-                border-radius: 4px;
-              "
-            />
-            <input
-              type="text"
-              id="address"
-              placeholder="Address"
-              required
-              style="
-                width: 100%;
-                margin: 5px 0;
-                padding: 8px;
-                border: 1px solid #ccc;
-                border-radius: 4px;
-              "
-            />
-            <input
-              type="text"
-              id="city"
-              placeholder="City"
-              required
-              style="
-                width: 100%;
-                margin: 5px 0;
-                padding: 8px;
-                border: 1px solid #ccc;
-                border-radius: 4px;
-              "
-            />
-            <input
-              type="text"
-              id="state"
-              placeholder="State"
-              required
-              style="
-                width: 100%;
-                margin: 5px 0;
-                padding: 8px;
-                border: 1px solid #ccc;
-                border-radius: 4px;
-              "
-            />
-            <input
-              type="text"
-              id="zip"
-              placeholder="ZIP Code"
-              required
-              style="
-                width: 100%;
-                margin: 5px 0;
-                padding: 8px;
-                border: 1px solid #ccc;
-                border-radius: 4px;
-              "
-            />
-            <button type="submit" id="recipient-submit-btn" style="margin: 10px 5px 0 0">
-              Add Recipient
-            </button>
-            <button
-              type="button"
-              onclick="toggleAddForm()"
-              style="background: #6c757d"
-            >
-              Cancel
-            </button>
-          </form>
+            <h3 id="recipient-form-title">Add New Recipient</h3>
+            <form id="recipient-form">
+              <input
+                type="text"
+                id="name"
+                placeholder="Name"
+                required
+                style="
+                  width: 100%;
+                  margin: 5px 0;
+                  padding: 8px;
+                  border: 1px solid #ccc;
+                  border-radius: 4px;
+                "
+              />
+              <input
+                type="text"
+                id="address"
+                placeholder="Address"
+                required
+                style="
+                  width: 100%;
+                  margin: 5px 0;
+                  padding: 8px;
+                  border: 1px solid #ccc;
+                  border-radius: 4px;
+                "
+              />
+              <input
+                type="text"
+                id="city"
+                placeholder="City"
+                required
+                style="
+                  width: 100%;
+                  margin: 5px 0;
+                  padding: 8px;
+                  border: 1px solid #ccc;
+                  border-radius: 4px;
+                "
+              />
+              <input
+                type="text"
+                id="state"
+                placeholder="State"
+                required
+                style="
+                  width: 100%;
+                  margin: 5px 0;
+                  padding: 8px;
+                  border: 1px solid #ccc;
+                  border-radius: 4px;
+                "
+              />
+              <input
+                type="text"
+                id="zip"
+                placeholder="ZIP Code"
+                required
+                style="
+                  width: 100%;
+                  margin: 5px 0;
+                  padding: 8px;
+                  border: 1px solid #ccc;
+                  border-radius: 4px;
+                "
+              />
+              <button
+                type="submit"
+                id="recipient-submit-btn"
+                style="margin: 10px 5px 0 0"
+              >
+                Add Recipient
+              </button>
+              <button
+                type="button"
+                onclick="toggleAddForm()"
+                style="background: #6c757d"
+              >
+                Cancel
+              </button>
+            </form>
           </div>
         </div>
 
         <!-- Update Recipient Form (separate from Add) -->
-        <div id="update-recipient-form" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="update-recipient-title" style="display: none;">
+        <div
+          id="update-recipient-form"
+          class="modal-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="update-recipient-title"
+          style="display: none"
+        >
           <div class="modal-content">
-          <h3 id="update-recipient-title">Update Recipient</h3>
-          <form id="recipient-update-form">
-            <input
-              type="text"
-              id="update-name"
-              placeholder="Name"
-              required
-              style="width: 100%; margin: 5px 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"
-            />
-            <input
-              type="text"
-              id="update-address"
-              placeholder="Address"
-              required
-              style="width: 100%; margin: 5px 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"
-            />
-            <input
-              type="text"
-              id="update-city"
-              placeholder="City"
-              required
-              style="width: 100%; margin: 5px 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"
-            />
-            <input
-              type="text"
-              id="update-state"
-              placeholder="State"
-              required
-              style="width: 100%; margin: 5px 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"
-            />
-            <input
-              type="text"
-              id="update-zip"
-              placeholder="ZIP Code"
-              required
-              style="width: 100%; margin: 5px 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"
-            />
-            <button type="submit" id="recipient-update-btn" style="margin: 10px 5px 0 0; background: #007bff;">Update</button>
-            <button type="button" id="cancel-update-btn" style="background: #6c757d">Cancel changes</button>
-          </form>
+            <h3 id="update-recipient-title">Update Recipient</h3>
+            <form id="recipient-update-form">
+              <input
+                type="text"
+                id="update-name"
+                placeholder="Name"
+                required
+                style="
+                  width: 100%;
+                  margin: 5px 0;
+                  padding: 8px;
+                  border: 1px solid #ccc;
+                  border-radius: 4px;
+                "
+              />
+              <input
+                type="text"
+                id="update-address"
+                placeholder="Address"
+                required
+                style="
+                  width: 100%;
+                  margin: 5px 0;
+                  padding: 8px;
+                  border: 1px solid #ccc;
+                  border-radius: 4px;
+                "
+              />
+              <input
+                type="text"
+                id="update-city"
+                placeholder="City"
+                required
+                style="
+                  width: 100%;
+                  margin: 5px 0;
+                  padding: 8px;
+                  border: 1px solid #ccc;
+                  border-radius: 4px;
+                "
+              />
+              <input
+                type="text"
+                id="update-state"
+                placeholder="State"
+                required
+                style="
+                  width: 100%;
+                  margin: 5px 0;
+                  padding: 8px;
+                  border: 1px solid #ccc;
+                  border-radius: 4px;
+                "
+              />
+              <input
+                type="text"
+                id="update-zip"
+                placeholder="ZIP Code"
+                required
+                style="
+                  width: 100%;
+                  margin: 5px 0;
+                  padding: 8px;
+                  border: 1px solid #ccc;
+                  border-radius: 4px;
+                "
+              />
+              <button
+                type="submit"
+                id="recipient-update-btn"
+                style="margin: 10px 5px 0 0; background: #007bff"
+              >
+                Update
+              </button>
+              <button
+                type="button"
+                id="cancel-update-btn"
+                style="background: #6c757d"
+              >
+                Cancel changes
+              </button>
+            </form>
           </div>
         </div>
 
-        <div id="add-sender-form" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="sender-form-title" style="display: none;">
+        <div
+          id="add-sender-form"
+          class="modal-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="sender-form-title"
+          style="display: none"
+        >
           <div class="modal-content">
-          <h3 id="sender-form-title">Set Sender Information</h3>
-          <form id="sender-form">
-            <input
-              type="text"
-              id="sender-name"
-              placeholder="Sender Name"
-              required
-              style="
-                width: 100%;
-                margin: 5px 0;
-                padding: 8px;
-                border: 1px solid #ccc;
-                border-radius: 4px;
-              "
-            />
-            <input
-              type="text"
-              id="sender-address"
-              placeholder="Sender Address"
-              required
-              style="
-                width: 100%;
-                margin: 5px 0;
-                padding: 8px;
-                border: 1px solid #ccc;
-                border-radius: 4px;
-              "
-            />
-            <input
-              type="text"
-              id="sender-city"
-              placeholder="Sender City"
-              required
-              style="
-                width: 100%;
-                margin: 5px 0;
-                padding: 8px;
-                border: 1px solid #ccc;
-                border-radius: 4px;
-              "
-            />
-            <input
-              type="text"
-              id="sender-state"
-              placeholder="Sender State"
-              required
-              style="
-                width: 100%;
-                margin: 5px 0;
-                padding: 8px;
-                border: 1px solid #ccc;
-                border-radius: 4px;
-              "
-            />
-            <input
-              type="text"
-              id="sender-zip"
-              placeholder="Sender ZIP Code"
-              required
-              style="
-                width: 100%;
-                margin: 5px 0;
-                padding: 8px;
-                border: 1px solid #ccc;
-                border-radius: 4px;
-              "
-            />
-            <input
-              type="number"
-              id="label-count"
-              placeholder="Type the number of labels to print"
-              min="1"
-              required
-              style="
-                width: 100%;
-                margin: 5px 0;
-                padding: 8px;
-                border: 1px solid #ccc;
-                border-radius: 4px;
-              "
-            />
-            <button type="submit" style="margin: 10px 5px 0 0">
-              Set Sender
-            </button>
-            <button
-              type="button"
-              onclick="toggleSenderForm()"
-              style="background: #6c757d"
-            >
-              Cancel
-            </button>
-          </form>
+            <h3 id="sender-form-title">Set Sender Information</h3>
+            <form id="sender-form">
+              <input
+                type="text"
+                id="sender-name"
+                placeholder="Sender Name"
+                required
+                style="
+                  width: 100%;
+                  margin: 5px 0;
+                  padding: 8px;
+                  border: 1px solid #ccc;
+                  border-radius: 4px;
+                "
+              />
+              <input
+                type="text"
+                id="sender-address"
+                placeholder="Sender Address"
+                required
+                style="
+                  width: 100%;
+                  margin: 5px 0;
+                  padding: 8px;
+                  border: 1px solid #ccc;
+                  border-radius: 4px;
+                "
+              />
+              <input
+                type="text"
+                id="sender-city"
+                placeholder="Sender City"
+                required
+                style="
+                  width: 100%;
+                  margin: 5px 0;
+                  padding: 8px;
+                  border: 1px solid #ccc;
+                  border-radius: 4px;
+                "
+              />
+              <input
+                type="text"
+                id="sender-state"
+                placeholder="Sender State"
+                required
+                style="
+                  width: 100%;
+                  margin: 5px 0;
+                  padding: 8px;
+                  border: 1px solid #ccc;
+                  border-radius: 4px;
+                "
+              />
+              <input
+                type="text"
+                id="sender-zip"
+                placeholder="Sender ZIP Code"
+                required
+                style="
+                  width: 100%;
+                  margin: 5px 0;
+                  padding: 8px;
+                  border: 1px solid #ccc;
+                  border-radius: 4px;
+                "
+              />
+              <input
+                type="number"
+                id="label-count"
+                placeholder="Type the number of labels to print"
+                min="1"
+                required
+                style="
+                  width: 100%;
+                  margin: 5px 0;
+                  padding: 8px;
+                  border: 1px solid #ccc;
+                  border-radius: 4px;
+                "
+              />
+              <button type="submit" style="margin: 10px 5px 0 0">
+                Set Sender
+              </button>
+              <button
+                type="button"
+                onclick="toggleSenderForm()"
+                style="background: #6c757d"
+              >
+                Cancel
+              </button>
+            </form>
           </div>
         </div>
 
@@ -501,7 +589,7 @@
         }
 
         modal.style.display = "flex";
-        modal.setAttribute('data-open', 'true');
+        modal.setAttribute("data-open", "true");
 
         // Key handler to close on Escape
         function onKey(e) {
@@ -535,7 +623,7 @@
         if (!modal) return;
         console.debug("closeModal called:", modalId);
         modal.style.display = "none";
-        modal.removeAttribute('data-open');
+        modal.removeAttribute("data-open");
         if (modal.__onKey) {
           document.removeEventListener("keydown", modal.__onKey);
           delete modal.__onKey;
@@ -558,7 +646,10 @@
 
         // restore focus if possible, but do not throw if the element is gone
         try {
-          if (_lastFocusedElement && typeof _lastFocusedElement.focus === "function") {
+          if (
+            _lastFocusedElement &&
+            typeof _lastFocusedElement.focus === "function"
+          ) {
             _lastFocusedElement.focus();
           }
         } catch (err) {
@@ -651,8 +742,10 @@
           // prepare for add
           document.getElementById("recipient-form").reset();
           delete document.getElementById("recipient-form").dataset.editId;
-          document.getElementById("recipient-form-title").textContent = "Add New Recipient";
-          document.getElementById("recipient-submit-btn").textContent = "Add Recipient";
+          document.getElementById("recipient-form-title").textContent =
+            "Add New Recipient";
+          document.getElementById("recipient-submit-btn").textContent =
+            "Add Recipient";
           openModal("add-recipient-form", "#name");
         }
       }
@@ -663,7 +756,8 @@
         .addEventListener("submit", async (e) => {
           e.preventDefault();
 
-          const editId = document.getElementById("recipient-update-form").dataset.editId;
+          const editId = document.getElementById("recipient-update-form")
+            .dataset.editId;
           if (!editId) return;
 
           const formData = {
@@ -694,10 +788,12 @@
         });
 
       // Cancel changes button handler
-      document.getElementById("cancel-update-btn").addEventListener("click", (e) => {
-        e.preventDefault();
-        cancelRecipientUpdate();
-      });
+      document
+        .getElementById("cancel-update-btn")
+        .addEventListener("click", (e) => {
+          e.preventDefault();
+          cancelRecipientUpdate();
+        });
 
       document
         .getElementById("recipient-form")
@@ -712,7 +808,8 @@
             zip: document.getElementById("zip").value,
           };
 
-          const editId = document.getElementById("recipient-form").dataset.editId;
+          const editId =
+            document.getElementById("recipient-form").dataset.editId;
 
           if (editId) {
             try {
@@ -726,8 +823,10 @@
               addresses[index] = updatedRecipient;
               renderLabels();
               delete document.getElementById("recipient-form").dataset.editId;
-              document.getElementById("recipient-form-title").textContent = "Add New Recipient";
-              document.getElementById("recipient-submit-btn").textContent = "Add Recipient";
+              document.getElementById("recipient-form-title").textContent =
+                "Add New Recipient";
+              document.getElementById("recipient-submit-btn").textContent =
+                "Add Recipient";
             } catch (error) {
               console.error("Error updating recipient:", error);
             }
@@ -790,6 +889,7 @@
         initialSelection.style.display = "none";
         labelControls.style.display = "block";
         previewSection.style.display = "block";
+        previewSection.style.paddingBottom = "20px";
       }
 
       function showSenderLabels() {
